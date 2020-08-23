@@ -1,0 +1,7 @@
+error: Expected comparison operator (<, <=, >, >=, ==, !=)
+ --> $DIR/no_comparison_2.rs:2:13
+  |
+2 | fn main() { chain!(1 + 4 + 3); }
+  |             ^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)

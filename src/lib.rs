@@ -1,28 +1,40 @@
 #[macro_export]
 macro_rules! chain {
-    (@wrap [$($prev:tt)*] [$($cur:tt)*] < $next:tt $($rest:tt)*) => {
+    (@wrap [$($prev:tt)*] [$($cur:tt)+] < $next:tt $($rest:tt)*) => {
         chain!(@wrap [$($prev)* ($($cur)*) <] [$next] $($rest)*)
     };
-    (@wrap [$($prev:tt)*] [$($cur:tt)*] <= $next:tt $($rest:tt)*) => {
+    (@wrap [$($prev:tt)*] [$($cur:tt)+] <= $next:tt $($rest:tt)*) => {
         chain!(@wrap [$($prev)* ($($cur)*) <=] [$next] $($rest)*)
     };
-    (@wrap [$($prev:tt)*] [$($cur:tt)*] > $next:tt $($rest:tt)*) => {
+    (@wrap [$($prev:tt)*] [$($cur:tt)+] > $next:tt $($rest:tt)*) => {
         chain!(@wrap [$($prev)* ($($cur)*) >] [$next] $($rest)*)
     };
-    (@wrap [$($prev:tt)*] [$($cur:tt)*] >= $next:tt $($rest:tt)*) => {
+    (@wrap [$($prev:tt)*] [$($cur:tt)+] >= $next:tt $($rest:tt)*) => {
         chain!(@wrap [$($prev)* ($($cur)*) >=] [$next] $($rest)*)
     };
-    (@wrap [$($prev:tt)*] [$($cur:tt)*] == $next:tt $($rest:tt)*) => {
+    (@wrap [$($prev:tt)*] [$($cur:tt)+] == $next:tt $($rest:tt)*) => {
         chain!(@wrap [$($prev)* ($($cur)*) ==] [$next] $($rest)*)
     };
-    (@wrap [$($prev:tt)*] [$($cur:tt)*] != $next:tt $($rest:tt)*) => {
+    (@wrap [$($prev:tt)*] [$($cur:tt)+] != $next:tt $($rest:tt)*) => {
         chain!(@wrap [$($prev)* ($($cur)*) !=] [$next] $($rest)*)
     };
 
-    (@wrap [$($prev:tt)*] [$($cur:tt)*]) => { chain!(@op $($prev)* ($($cur)*)) };
+    (@arg_err $op:tt) => {
+        compile_error!(concat!(
+            "Expected two arguments for \"", stringify!($op), "\""
+        ));
+    };
+    (@wrap [$($a:tt)*] [$($b:tt)*] < ) => { chain!(@arg_err <)  };
+    (@wrap [$($a:tt)*] [$($b:tt)*] <=) => { chain!(@arg_err <=) };
+    (@wrap [$($a:tt)*] [$($b:tt)*] > ) => { chain!(@arg_err >)  };
+    (@wrap [$($a:tt)*] [$($b:tt)*] >=) => { chain!(@arg_err >=) };
+    (@wrap [$($a:tt)*] [$($b:tt)*] ==) => { chain!(@arg_err ==) };
+    (@wrap [$($a:tt)*] [$($b:tt)*] !=) => { chain!(@arg_err !=) };
 
-    (@wrap [$($wrapped:tt)*] [$($cur:tt)*] $next:tt $($rest:tt)*) => {
-        chain!(@wrap [$($wrapped)*] [$($cur)* $next] $($rest)*)
+    (@wrap [$($prev:tt)*] [$($cur:tt)+]) => { chain!(@op $($prev)* ($($cur)*)) };
+
+    (@wrap [$($prev:tt)*] [$($cur:tt)+] $next:tt $($rest:tt)*) => {
+        chain!(@wrap [$($prev)*] [$($cur)* $next] $($rest)*)
     };
 
     (@op $a:tt $op:tt $b:tt) => {{ $a $op $b }};
@@ -32,6 +44,17 @@ macro_rules! chain {
         let b = $b;
         a $op b && chain!(@op b $($rest)*)
     }};
+
+    (@op $($rest:tt)*) => {{
+        compile_error!("Expected comparison operator (<, <=, >, >=, ==, !=)");
+    }};
+    
+    (< $($rest:tt)*)  => { chain!(@arg_err <)  };
+    (<= $($rest:tt)*) => { chain!(@arg_err <=) };
+    (>  $($rest:tt)*) => { chain!(@arg_err >)  };
+    (>= $($rest:tt)*) => { chain!(@arg_err >=) };
+    (== $($rest:tt)*) => { chain!(@arg_err ==) };
+    (!= $($rest:tt)*) => { chain!(@arg_err !=) };
 
     // Entrypoint
     ($first:tt $($rest:tt)*) => {
@@ -85,5 +108,11 @@ mod tests {
         // operators without terms being encapsulated in parentheses
         assert!(chain!(1 + 2 == 6 / 2 == 3));
         assert!(chain!(4 < 4 * 2 <= 4 * 3));
+    }
+
+    #[test]
+    fn compile_fail_tests() {
+        let t = trybuild::TestCases::new();
+        t.compile_fail("tests/compile_fail/*.rs");
     }
 }
