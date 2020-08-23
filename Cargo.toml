@@ -1,0 +1,8 @@
+[package]
+name = "cmpchain"
+version = "0.1.0"
+authors = ["georgerennie"]
+edition = "2018"
+
+[dev-dependencies]
+trybuild = "1.0.32"
