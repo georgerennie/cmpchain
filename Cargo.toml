@@ -1,8 +1,11 @@
 [package]
 name = "cmpchain"
 version = "0.1.0"
-authors = ["georgerennie"]
+authors = ["George Rennie"]
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/georgerennie/cmpchain"
+keywords = ["comparison", "chain"]
 
 [dev-dependencies]
 trybuild = "1.0.32"
