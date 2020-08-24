@@ -1,10 +1,3 @@
-#![warn(
-    clippy::all,
-    clippy::restriction,
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::cargo,
-)]
 //! A Rust library containing a macro to chain comparison operators succintly.
 //! The syntax is similar to that found in Python and Julia.
 
